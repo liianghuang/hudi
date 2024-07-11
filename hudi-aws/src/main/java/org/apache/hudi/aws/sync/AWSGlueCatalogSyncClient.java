@@ -41,6 +41,8 @@ import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.glue.GlueAsyncClient;
 import software.amazon.awssdk.services.glue.GlueAsyncClientBuilder;
+import software.amazon.awssdk.services.glue.model.TableInput;
+import software.amazon.awssdk.services.glue.model.UpdateTableRequest;
 import software.amazon.awssdk.services.glue.model.AlreadyExistsException;
 import software.amazon.awssdk.services.glue.model.BatchCreatePartitionRequest;
 import software.amazon.awssdk.services.glue.model.BatchCreatePartitionResponse;
@@ -144,7 +146,7 @@ public class AWSGlueCatalogSyncClient extends HoodieSyncClient {
   private final int changedPartitionsReadParallelism;
   private final int changeParallelism;
 
-  public AWSGlueCatalogSyncClient(HiveSyncConfig config) {
+  public AWSGlueCatalogSyncClient(GlueCatalogSyncClientConfig config) {
     super(config);
     try {
       GlueAsyncClientBuilder awsGlueBuilder = GlueAsyncClient.builder()
@@ -165,7 +167,7 @@ public class AWSGlueCatalogSyncClient extends HoodieSyncClient {
     this.changeParallelism = config.getIntOrDefault(PARTITION_CHANGE_PARALLELISM);
   }
 
-  AWSGlueCatalogSyncClient(GlueAsyncClient awsGlue, HiveSyncConfig config) {
+  AWSGlueCatalogSyncClient(GlueAsyncClient awsGlue, GlueCatalogSyncClientConfig config) {
     super(config);
     this.awsGlue = awsGlue;
     this.databaseName = config.getStringOrDefault(META_SYNC_DATABASE_NAME);
@@ -196,6 +198,10 @@ public class AWSGlueCatalogSyncClient extends HoodieSyncClient {
     } catch (Exception e) {
       throw new HoodieGlueSyncException("Failed to get all partitions for table " + tableId(databaseName, tableName), e);
     }
+  }
+
+  public String getDatabaseName() {
+    return this.databaseName;
   }
 
   @Override
